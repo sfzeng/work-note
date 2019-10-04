@@ -1,0 +1,478 @@
+etcd启动：
+./etcd --advertise-client-urls http://192.168.0.131:62379 --listen-client-urls http://192.168.0.131:62379 --listen-peer-urls http://192.168.0.131:62380 --data-dir /opt/opensds/etcd/data  >> /var/log/opensds/etcd.log 2>&1 &
+./etcd --advertise-client-urls http://192.168.0.66:62379 --listen-client-urls http://192.168.0.66:62379 --listen-peer-urls http://192.168.0.66:62380 --data-dir /opt/opensds/etcd/data  >> /var/log/opensds/etcd.log 2>&1 &
+./osdsdock --config-file /etc/opensds/attacher.conf &
+
+lsblk  查看块设备
+
+使用opensds创建并使用lvm卷过程：
+osdsctl volume create 创建卷
+[osdsctl volume list]
+./osdsctl volume attachment create '{
+    "name": "sample-volume-attachment",
+    "description": "This is a sample volume attachment for testing",
+    "volumeId": "ddb30731-4704-48b9-b87e-4c7e73aa9d34",
+    "hostInfo": {
+        "platform":"x86_64",
+        "osType":"linux",
+        "host":"ecs-32bc",
+        "ip":"192.168.0.131",
+        "initiator":"iqn.1993-08.org.debian:01:42e1a22343c111111111"
+    }
+}'
+[osdsctl volume attachment list]
+tgtadm --lld iscsi --op new --mode logicalunit --tid 2 --lun 1 -b /dev/opensds-volumes-default/volume-a784c962-eb7a-4120-b05d-7ea5dd7a27c0 //其中tid通过tgt-admin -s查询得到，卷ID为对应的卷ID
+
+iscsiadm --mode discovery --type sendtargets --portal 192.168.0.131:3260
+iscsiadm -m node -p 192.168.0.131:3260 -T iqn.2017-10.io.opensds:64e5b877-79d4-4736-9815-141ee53e1e6c --login
+
+iscsiadm -m node -p 192.168.56.103:3260 -T iqn.2017-10.io.opensds:volume:00000001 --logout
+iscsiadm -m node -p 192.168.56.103:3260 -T iqn.2017-10.io.opensds:volume:00000001 --login
+iscsiadm -m session -s  
+iscsiadm -m node --logout
+iscsiadm -m node -o delete -T iqn.2017-10.io.opensds:562d324d-b263-4141-9ce6-ec4be9111b02
+
+手动挂卷：tgtadm --lld iscsi --op add --mode logicalunit --tid 1 --lun 15
+
+tgt-admin -s
+tgt-admin --update ALL
+tgt-admin --delete ALL
+
+./osdsctl dock list
+
+lvremove
+
+
+
+export ETCDCTL_API=3
+./etcdctl get v1beta --prefix --endpoints "http://192.168.0.131:62379"
+./etcdctl del v1beta/docks/909741c7-acd4-548e-9500-6e5549227cd0 --endpoints "http://192.168.0.131:62379"
+./etcdctl del keyid --endpoints "http://192.168.0.131:62379"
+
+kubectl describe pod xxx 查看pod错误信息
+
+apt-cache madison docker-ce 查看可用的docker版本
+sudo apt-get install docker-ce=<VERSION> 安装指定版本docker
+wget https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/docker-ce_18.03.1~ce-0~ubuntu_amd64.deb
+dpkg -i docker-ce_18.03.1~ce-0~ubuntu_amd64.deb 
+(apt-get install -y libltdl7 libseccomp2)
+
+kubectl logs -f csi-provisioner-opensdsplugin-0 opensds 查看日志
+kubectl describe pod csi-provisioner-opensdsplugin-0
+kubectl exec -it csi-provisioner-opensdsplugin-0 opensds /bin/bash
+
+
+ansible-playbook site.yml -i local.hosts
+ansible-playbook clean.yml -i local.hosts
+
+使用ansible后端为ceph的OpenSDS环境
+
+git push origin xl:master
+
+protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. dataflow.proto
+
+获取证书：obs.cn-north-1.myhwclouds.com
+
+install docker-machine
+	curl -L https://github.com/docker/machine/releases/download/v0.3.0/docker-machine_linux-amd64 > /usr/local/bin/docker-machine
+	chmod +x /usr/local/bin/docker-machine
+	docker-machine -v
+kafka:
+	/opt/kafka/bin/kafka-topics.sh --create --topic test --zookeeper kafka_zookeeper_1:2181 --partitions 1 --replication-factor 1
+	/opt/kafka/bin/kafka-console-producer.sh --topic=test --broker-list kafka_kafka_1:9092
+	/opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka_kafka_1:9092 --from-beginning --topic test
+	
+install docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose	
+	
+#######################multi-cloud S3 curl command:
+curl -H "Content-type: application/xml" -X PUT -d "<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><LocationConstraint>backend_obs</LocationConstraint></CreateBucketConfiguration>" http://10.10.3.151:8088/v1/s3/bucket_obs
+
+
+curl -H "Content-type: application/xml" -X GET http://10.10.3.151:8088/v1/s3
+
+curl -H "Content-type: application/xml" -X DELETE http://10.10.3.151:8088/v1/s3/bucket_aws
+
+curl -H "Content-type: application/xml" -X PUT http://10.10.3.151:8088/v1/s3/awstest1/test.txt
+curl -H "Content-type: application/xml" -d "content 963852741" -X PUT http://10.10.3.151:8088/v1/s3/bucket_obs/aa.txt
+curl -H "Content-type: application/xml" -X PUT -T test.tgz http://10.10.3.151:8089/v1/s3/bucket_aws/test.tgz
+
+curl -H "Content-type: application/xml" -X GET http://10.10.3.151:8088/v1/s3/awstest1
+
+curl -H "Content-type: application/xml" -X DELETE http://10.10.3.151:8088/v1/s3/bucket_obs/test.txt
+
+######################postman:
+{
+	"id": "",
+	"id": "",
+	"name": "test",
+	"tenant": "tenant",
+	"description": "for test, after update 6666",
+	"sched": {
+		"type": "sched_type",
+		"days": [
+			"2",
+			"4",
+			"6"
+		],
+		"time_point": "03:00"
+	}
+}
+
+
+{
+    "name": "test",
+    "tenant": "tenant",
+    "type":"migration",
+    "policyId":"5b8cd0f8ad1f48de57f43404",
+    "sourceConnId":"5b8e00c29254845f6726758e",
+    "destConnId":"5b8e00c29254845f6726758e",
+    "sourceDir":"/",
+    "destDir":"/",
+    "overWrite":true,
+    "remainSource":false
+}
+
+{
+    "description": "for test",
+    "id": "",
+    "name": "test",
+    "type":"migration",
+    "sourceConn":{
+    	"storType":"opensds-obj",
+    	"bucketName":"bucket1"
+	},
+	"destConn":{
+		"storType":"opensds-obj",
+		"bucketName":"bucket2"		
+	},
+	"filt":{
+		"prefix":"/depart1",
+		"tag":[{"key":"tag1", "value":"xinjiang"},{"key":"tag2", "value":"yunna"}]
+	},
+	"overwrite":true,
+	"remainSource":true,
+    "tenant": "tenant",
+    "policyid":""
+}
+
+
+
+create backend:
+{
+    "Name": "obs",
+    "TenantId": "test",
+    "UserId": "001",
+    "Type": "obs",
+    "Region": "cn-north-1",
+    "Endpoint": "obs.cn-north-1.myhwclouds.com",
+    "BucketName":"obs-ee0e",
+    "Access":"4X7JQDFTCKUNWFBRYZVC",
+    "Security":"9hr0ekZgg6vZHulEekTVfWuu1lnPFvpVAJQNHXdn"
+}
+{
+    "name": "test",
+    "tenant": "tenant",
+    "selfDef":true,
+    "bucketName":"obs-test-123",
+    "storType":"hw-obj",
+    "storLocation":"obs.cn-north-1.myhwclouds.com",
+    "accessKey":"4X7JQDFTCKUNWFBRYZVC",
+    "secreteKey":"9hr0ekZgg6vZHulEekTVfWuu1lnPFvpVAJQNHXdn"
+}
+
+{
+    "type": "ceph-s3", 
+    "endpoint": "http://182.138.104.147:7480", 
+    "name": "ceph001", 
+    "region": "", 
+    "bucketName": "my-new-bucket", 
+    "access": "ZY9EZJ7CCJOYJD7UH020", 
+    "security": "MqED9amfaXuCYcStsNxgX6SaR3MhVs4wkn3UMVDZ"
+}
+
+
+create backend:
+{
+    "Name": "azure",
+    "TenantId": "test",
+    "UserId": "001",
+    "Type": "azure-blob",
+    "Region": "East US",
+    "Endpoint": "https://zsftest.blob.core.windows.net/container",
+    "BucketName":"container",
+    "Access":"zsftest",
+    "Security":"wkiGL5gv6ljye6LK7aNG4KTkFAo1lJ2HRU0oAuAYXSIqAWRQpkcW4YRxaj2PZKPFAJPga/Z+Z0oeducxONll7Q=="
+	            c
+}
+testzsf.s3-website-ap-southeast-1.amazonaws.com
+
+testzsf
+ap-southeast-1
+s3.amazonaws.com
+AK: AKIAI2XIMJEDPCSRMEDA
+SK: HsJud0dP+lBg5zDn5LRpdB6aTSRHHBI4/vCgsSKu
+
+IBM:
+    "access_key_id": "f67031fee79e4128b00217f794768784",
+    "secret_access_key": "5be353499946776978aebcdd11457d6e5fb0af593e7feedd"
+	endpoint: s3.jp-tok.cloud-object-storage.appdomain.cloud
+	Region: AP Japan
+
+jack_panzer/dfAe423vc0D
+
+{
+            "id": "",
+            "name": "aws-obs-1",
+            "description": "for test",
+            "type": "migration",
+            "sourceConn": {
+                "storType": "aws",
+                "bucketName": "",
+                "ConnConfig": [
+                	{
+                		"key":"region",
+                		"value":"ap-southeast-1"
+                	},
+                	{
+                		"key":"endpoint",
+                		"value":"s3.amazonaws.com"
+                	},
+                	{
+                		"key":"bucketname",
+                		"value":"testzsf"
+                	},
+                	{
+                		"key":"access",
+                		"value":"AKIAIIISOTMOCUCDE6YQ"
+                	},
+                	{
+                		"key":"security",
+                		"value":"zdvQxGe1Z1N6fMb1nB+AuHs6FOljjrMvzPhg/rJG"
+                	}
+                ]
+            },
+            "destConn": {
+                "storType": "obs",
+                "bucketName": "",
+                "ConnConfig": [
+                	{
+                		"key":"region",
+                		"value":"cn-north-1"
+                	},
+                	{
+                		"key":"endpoint",
+                		"value":"obs.cn-north-1.myhwclouds.com"
+                	},
+                	{
+                		"key":"bucketname",
+                		"value":"obs-ee0e"
+                	},
+                	{
+                		"key":"access",
+                		"value":"4X7JQDFTCKUNWFBRYZVC"
+                	},
+                	{
+                		"key":"security",
+                		"value":"9hr0ekZgg6vZHulEekTVfWuu1lnPFvpVAJQNHXdn"
+                	}
+                ]
+            },
+            "filt": {
+                "prefix": "/",
+                "tag": [
+                    {
+                        "key": "tag1",
+                        "value": "xj"
+                    },
+                    {
+                        "key": "tag2",
+                        "value": "yn"
+                    }
+                ]
+            },
+            "overWrite": true,
+            "remainSource": true,
+            "tenant": "tenant"
+}
+
+{
+            "id": "",
+            "name": "azure-aws",
+            "description": "for test",
+            "type": "migration",
+            "destConn": {
+                "storType": "aws",
+                "bucketName": "bucket_aws",
+                "ConnConfig": [
+                  	{
+                		"key":"region",
+                		"value":"ap-southeast-1"
+                	},
+                	{
+                		"key":"endpoint",
+                		"value":"s3.amazonaws.com"
+                	},
+                	{
+                		"key":"bucketname",
+                		"value":"testzsf1"
+                	},
+                	{
+                		"key":"access",
+                		"value":"AKIAIIISOTMOCUCDE6YQ"
+                	},
+                	{
+                		"key":"security",
+                		"value":"zdvQxGe1Z1N6fMb1nB+AuHs6FOljjrMvzPhg/rJG"
+                	}
+                ]
+            },
+            "sourceConn": {
+                "storType": "azure",
+                "bucketName": "bucket_azure",
+                "ConnConfig": [
+                    {
+                		"key":"region",
+                		"value":"ap-southeast-1"
+                	},
+                	{
+                		"key":"endpoint",
+                		"value":"https://zsftest.blob.core.windows.net/container"
+                	},
+                	{
+                		"key":"bucketname",
+                		"value":"container"
+                	},
+                	{
+                		"key":"access",
+                		"value":"zsftest"
+                	},
+                	{
+                		"key":"security",
+                		"value":"wkiGL5gv6ljye6LK7aNG4KTkFAo1lJ2HRU0oAuAYXSIqAWRQpkcW4YRxaj2PZKPFAJPga/Z+Z0oeducxONll7Q=="
+                	}	
+                ]
+            },
+            "filt": {
+                "prefix": "/",
+                "tag": [
+                    {
+                        "key": "tag1",
+                        "value": "xj"
+                    },
+                    {
+                        "key": "tag2",
+                        "value": "yn"
+                    }
+                ]
+            },
+            "overWrite": true,
+            "remainSource": true,
+            "tenant": "tenant"
+}
+
+
+testzsf.s3-website-ap-southeast-1.amazonaws.com
+s3.amazonaws.com
+AK: AKIAI2XIMJEDPCSRMEDA
+SK: HsJud0dP+lBg5zDn5LRpdB6aTSRHHBI4/vCgsSKu
+
+https://mrs.cn-north-1.myhuaweicloud.com/v1.1/ffcae646b8824c588c3bc0f0267b3b08
+AK:4X7JQDFTCKUNWFBRYZVD
+SK:9hr0ekZgg6vZHulEekTVfWuu1lnPFvpVAJQNHXdm
+
+git clone https://github.com/Azure/azure-storage-blob-go.git
+git clone https://github.com/Azure/azure-pipeline-go.git
+
+lynheell@gmail.com
+Xll51394
+East US
+
+wkiGL5gv6ljye6LK7aNG4KTkFAo1lJ2HRU0oAuAYXSIqAWRQpkcW4YRxaj2PZKPFAJPga/Z+Z0oeducxONll7Q==
++fKEVhr4ExmjrbJT5k9ReUKgUC1y1IgGN3GueFxx2ksaBAmnex5d7WsoxLh/O5KTMEiUX0IuD7BWz5c0AeNg7g==
+
+
+git clone https://github.com/jimccfun/opensds-dashboard.git
+	
+curl -H "Content-type: application/json" -X POST -d '
+{
+    "type": "aws-s3", 
+    "endpoint": "s3.amazonaws.com", 
+    "name": "awss3", 
+    "region": "ap-northeast-1", 
+    "bucketName": "wbtestbuckt", 
+    "access": "AKIAIIISOTMOCUCDE6YQ", 
+    "security": "zdvQxGe1Z1N6fMb1nB+AuHs6FOljjrMvzPhg/rJG"
+}'  http://127.0.0.1:8089/v1/adminTenantId/backends
+	
+	
+<?xml version="1.0" encoding="UTF-8"?>
+ <BaseResponse>
+  <ErrorCode></ErrorCode>
+  <Msg>Create bucket successfully.</Msg>
+  <XXX_NoUnkeyedLiteral></XXX_NoUnkeyedLiteral>
+  <XXX_unrecognized></XXX_unrecognized>
+  <XXX_sizecache>0</XXX_sizecache>
+ </BaseResponse>
+ 
+name:backend_ceph
+type:Ceph 
+S3
+endpoint:http://139.159.254.220
+bucket: 
+bucket-opensds
+access_key: D9YOPCC4FZH17829CR6L,
+secret_key: 
+sCL5FhRgQSMGTBeplOYQyddHsA15gBbLOFZLtlh4
+
+
+
+
+aws:das_11@126.com/H***@***
+azure:lynheell@gmail.com/Xll51394
+
+db.aws_bucket.update({"_id":{$exists:true}}, {$set:{'lastmodified':1554829320}}, false, true)
+
+
+./build/out/bin/osdslet --logtostderr -v 8
+./build/out/bin/osdsdock --logtostderr -v 8
+./build/out/bin/osdsapiserver --logtostderr -v 8
+
+s3n://elasticmapreduce/samples/cloudfront/logprocessor.jar
+-input s3n://testzsf/analysis_bucket/input -output s3n://testzsf/analysis_bucket/output
+
+
+docker save xxx | ssh xx.xx.xx.xx -C "docker load"
+
+
+git status |grep "contrib/st2" |grep -v "modified" |awk  '{print $1}' | xargs -i cp {} --parents /home/backup/orchestration_0702/
+
+
+
+openstack role assignment list
+openstack group list --user user_id
+source /opt/stack/devstack/openrc admin admin
+
+apt-cache search librados
+
+yig(ceph) developent:
+apt-get install libradosstriper-dev librados-dev libradosstriper1 librados2 librdkafka-devel
+
+
+git diff --ignore-space-at-eol > ~test.diff
+git checkout .
+git apply --ignore-whitespace \~test.diff 
+
+
+protoc --go_out=plugins=grpc:./go/ ./proto/helloworld.proto
+
+
+
+dashboard：
+npm run build
+cp -R dist/* /var/www/html/
+service nginx restart
+
+
+docker rmi $(docker images | grep "none" | awk "{print $3}")

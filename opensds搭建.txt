@@ -1,0 +1,82 @@
+1首先安装go语言环境
+wget https://storage.googleapis.com/golang/go1.9.2.linux-amd64.tar.gz
+tar xzf go1.9.2.linux-amd64.tar.gz -C /usr/local/
+echo 'export GOROOT=/usr/local/go' >> /etc/profile
+echo 'export GOPATH=$HOME/gopath' >> /etc/profile
+echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' >> /etc/profile
+
+查看环境变量是否为空 
+source /etc/profile
+echo $GOPATH
+
+安装git和gcc
+apt-get install git
+apt-get install gcc
+apt-get install make
+
+下载代码
+git clone https://github.com/opensds/opensds.git
+
+编译
+apt-get install librados-dev librbd-dev -y
+mkdir gopath/src/github.com/opensds -p
+mv opensds/ gopath/src/github.com/opensds/
+cd gopath/src/github.com/opensds/opensds/
+make
+二进制输出目录
+ cd build/out/bin/
+
+安装opnsds
+  144  cd build/out/bin/
+  145  ls
+  146  cd ../../
+  147  cd ..
+  148  ls
+  149  cd script/devsds/
+  150  ls
+  151  ./install.sh 
+
+  158  export OPENSDS_ENDPOINT=http://localhost:50040
+  159  osdsctl pool lst
+  160  osdsctl pool list
+  161  curl 127.0.0.1:50040
+
+
+osdslet调试：~/gopath/src/github.com/opensds/opensds# ./build/out/bin/osdslet --logtostderr
+
+
+
+export OS_AUTH_URL=http://10.10.3.151/identity
+export OS_USERNAME=admin 
+export OS_PASSWORD=opensds@123 
+export OS_TENANT_NAME=admin 
+export OS_PROJECT_NAME=admin 
+export OS_USER_DOMAIN_ID=default
+
+
+
+
+dashboard:
+sudo npm install
+sudo ng build --prod
+cp -R dist/* /var/www/html/
+service nginx restart
+
+openstack role assignment list
+openstack group list --user user_id
+source /opt/stack/devstack/openrc admin admin
+
+apt-cache search librados
+
+yig(ceph) developent:
+apt-get install libradosstriper-dev librados-dev libradosstriper1 librados2 librdkafka-devel
+
+protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. dataflow.proto
+
+
+
+
+
+
+
+
