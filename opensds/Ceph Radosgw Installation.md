@@ -12,7 +12,7 @@ sudo apt install ceph-deploy
 ## ENABLE PASSWORD-LESS SSH
 ```
 ssh-keygen
-ssh-copy-id ceph-rgw
+ssh-copy-id ceph-rgw (For single node, ip of ceph-rgw should be 127.0.0.1, add it to /etc/hosts)
 ``` 
 ## cephy mon osd depoly
 
