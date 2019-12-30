@@ -4,6 +4,9 @@
 ```
 wget -q -O- 'https://download.ceph.com/keys/release.asc' | sudo apt-key add -
 echo deb https://download.ceph.com/debian-luminous/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
+*** If got error as below:
+    ModuleNotFoundError: No module named 'lsb_release'
+Run ModuleNotFoundError: No module named 'lsb_release' to fix.    
 sudo apt update
 sudo apt install ceph-deploy
 ```
