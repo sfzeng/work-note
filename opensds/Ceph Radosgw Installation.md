@@ -4,7 +4,6 @@
 ```
 wget -q -O- 'https://download.ceph.com/keys/release.asc' | sudo apt-key add -
 echo deb https://download.ceph.com/debian-luminous/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
-*** If got ModuleNotFoundError: No module named 'lsb_release', run ModuleNotFoundError: No module named 'lsb_release' to fix.    
 sudo apt update
 sudo apt install ceph-deploy
 ```
@@ -12,7 +11,7 @@ sudo apt install ceph-deploy
 ## ENABLE PASSWORD-LESS SSH
 ```
 ssh-keygen
-ssh-copy-id ceph-rgw (For single node, ip of ceph-rgw should be 127.0.0.1, add it to /etc/hosts)
+ssh-copy-id ceph-rgw
 ``` 
 ## cephy mon osd depoly
 
