@@ -9,3 +9,7 @@ VBoxManage storageattach vmname --storagectl SATA --port 3 --type hdd --medium n
 VBoxManage  list hdds
 VBoxManage closemedium disk disk_uuid --delete
 ```
+### Start VM
+```
+VBoxManage startvm vmname -type headless
+```
