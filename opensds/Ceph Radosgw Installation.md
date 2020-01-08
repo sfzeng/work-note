@@ -29,7 +29,13 @@ ceph-deploy purge {ceph-node} [{ceph-node}]
 ceph-deploy purgedata {ceph-node} [{ceph-node}]
 ceph-deploy forgetkeys
 rm ceph.*
+
+***Clean VG:
+vgdisplay -v VolGroupXXX    -- to find the logical and physical volume
+lvremove LogicalVolumeXXX   -- delete logical volume
+vgremove VolGroupXXX        -- delete volume group
 ```
+
 ### depoly
 On your admin node from the directory you created for holding your configuration details, perform the following steps using ceph-deploy.
 create cluster
