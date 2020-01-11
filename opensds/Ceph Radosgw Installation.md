@@ -31,6 +31,7 @@ ceph-deploy forgetkeys
 rm ceph.*
 
 ***Clean VG:
+vgscan
 vgdisplay -v VolGroupXXX    -- to find the logical and physical volume
 lvremove LogicalVolumeXXX   -- delete logical volume
 vgremove VolGroupXXX        -- delete volume group
