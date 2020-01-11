@@ -51,7 +51,7 @@ echo "osd journal size = 100" >> ceph.conf
 ```
 Install Ceph packages
 ```
-ceph-deploy install --no-adjust-repos ceph-rgw
+ceph-deploy install ceph-rgw  # --no-adjust-repos to install the version you specified.
 ```
 Deploy the initial monitor(s) and gather the keys
 ```
