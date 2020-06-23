@@ -111,6 +111,7 @@ conn = boto.connect_s3(
 aws_access_key_id = access_key,
 aws_secret_access_key = secret_key,
 host = '10.10.3.157',
+port = 7480,
 is_secure=False,
 calling_format = boto.s3.connection.OrdinaryCallingFormat(),
 )
